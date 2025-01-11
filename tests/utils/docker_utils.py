@@ -49,7 +49,6 @@ def start_database_container():
             "POSTGRES_PASSWORD": "postgres",
         },
         "volumes": [f"{scripts_dir}:/docker-entrypoint-initdb.d"],
-        "network_mode": "test_driven_fast_api_main"
     }
 
     container = client.containers.run(**container_config)
