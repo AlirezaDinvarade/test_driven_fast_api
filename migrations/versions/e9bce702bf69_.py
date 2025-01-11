@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d13338879503
+Revision ID: e9bce702bf69
 Revises: 
-Create Date: 2025-01-11 12:15:07.242283
+Create Date: 2025-01-11 14:07:22.689951
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd13338879503'
+revision: str = 'e9bce702bf69'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,12 +24,14 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
     sa.Column('slug', sa.String(length=120), nullable=False),
-    sa.Column('is_active', sa.Boolean(), nullable=False),
-    sa.Column('level', sa.Integer(), nullable=False),
+    sa.Column('is_active', sa.Boolean(), server_default='False', nullable=False),
+    sa.Column('level', sa.Integer(), server_default='100', nullable=False),
     sa.Column('parent_id', sa.Integer(), nullable=True),
     sa.CheckConstraint('LENGTH(name) > 0', name='name_length_check'),
     sa.CheckConstraint('LENGTH(slug) > 0', name='slug_length_check'),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('name', 'level', name='unique_category_name_level'),
+    sa.UniqueConstraint('slug', name='unique_category_slug')
     )
     # ### end Alembic commands ###
 

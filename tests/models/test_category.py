@@ -1,7 +1,8 @@
 from sqlalchemy import Integer, Boolean, String
-
+import pytest
 
 # confirm the presence of all required tables
+@pytest.mark.model
 def test_model_structure_tabel_exists(db_inspector):
     assert db_inspector.has_table("category")
 
@@ -45,3 +46,32 @@ def test_model_structure_column_constraints(db_inspector):
 
     assert any(constraint["name"] == "name_length_check" for constraint in constraints)
     assert any(constraint["name"] == "slug_length_check" for constraint in constraints)
+
+
+# Verify deafult values
+def test_model_structure_column_deafult_values(db_inspector):
+    table = "category"
+    columns = {columns["name"] : columns for columns in db_inspector.get_columns(table)}
+
+    assert columns["is_active"]["default"] == "false"
+    assert columns["level"]["default"] == "100"
+
+
+# Ensure column length
+def test_model_structure_column_lengths(db_inspector):
+    table = "category"
+    columns = {columns["name"] : columns for columns in db_inspector.get_columns(table)}
+    print(columns)
+
+    assert columns["name"]["type"].length == 100
+    assert columns["slug"]["type"].length == 120
+
+
+# Validate unique constaraints
+def test_model_structure_unique_constraints(db_inspector):
+    table = "category"
+    constraints = db_inspector.get_unique_constraints(table)
+
+    assert any(constraint["name"] == "unique_category_name_level" for constraint in constraints)
+    assert any(constraint["name"] == "unique_category_slug" for constraint in constraints)
+
