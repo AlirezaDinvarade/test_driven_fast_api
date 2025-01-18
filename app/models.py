@@ -33,6 +33,7 @@ class Product(Base):
     is_active = Column(Boolean, nullable=False, default=False, server_default="False")
     stock_status = Column(Enum("oos", "is", "obo", name="status_enum"), nullable=False, server_default="oos")
     category_id = Column(Integer, ForeignKey("category.id") ,nullable=False)
+    seasonal_id = Column(Integer, ForeignKey("seasonal_events.id") ,nullable=True)
 
 
     __table_args__ = (
@@ -76,5 +77,83 @@ class ProductImage(Base):
         CheckConstraint("LENGTH(url) > 100", name="product_line_image_url_length_check"),
         CheckConstraint("order_image >= 1 AND order_image <= 20", name="product_line_image_order_range"),
         UniqueConstraint("order_image", "product_line_id", name="unique_product_image_order_product_line_id"),
+    )
+
+
+class SeasonalEvents(Base):
+    __tablename__ = "seasonal_events"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    start_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime, nullable=False)
+    name = Column(String(100) ,nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("LENGTH(name) > 0", name="seasonal_events_name_length_check"),
+        UniqueConstraint("name", name="unique_seasonal_events_name"),
+    )
+
+
+class Attribute(Base):
+    __tablename__ = "attribute"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    description = Column(String(100), nullable=True)
+    name = Column(String(100) ,nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("LENGTH(name) > 0", name="attribute_name_length_check"),
+        UniqueConstraint("name", name="unique_attribute_name"),
+    )   
+
+
+class ProductType(Base):
+    __tablename__="product_type"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    name = Column(String(100), nullable=False)
+    level = Column(Integer, nullable=False, server_default="100")
+    parent_id = Column(Integer, ForeignKey("product_type.id") ,nullable=True)
+
+    __table_args__ = (
+        CheckConstraint("LENGTH(name) > 0", name="product_type_name_length_check"),
+        UniqueConstraint("name", "level", name="unique_product_type_name_level"),
+    )
+
+
+class AttributeValue(Base):
+    __tablename__="attribute_value"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    attribute_value = Column(String(100), nullable=False)
+    attribute_id = Column(Integer, ForeignKey("attribute.id") ,nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("LENGTH(attribute_value) > 0", name="attribute_value_length_check"),
+        UniqueConstraint("attribute_id", "attribute_value",  name="unique_attribute_value_attribute_id"),
+    )
+
+
+class ProductLineAttributeValue(Base):
+    __tablename__="product_line_attribute_value"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    attribute_value_id = Column(Integer, ForeignKey("attribute_value.id") ,nullable=False)
+    product_line_id = Column(Integer, ForeignKey("product_line.id") ,nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("attribute_value_id", "product_line_id",  name="unique_attribute_value_product_line"),
+    )
+
+
+class ProductProductType(Base):
+    __tablename__="product_product_type"
+
+    id = Column(Integer, primary_key=True, nullable=False)
+    product_id = Column(Integer, ForeignKey("product.id") ,nullable=False)
+    product_type_id = Column(Integer, ForeignKey("product_type.id") ,nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("product_id", "product_type_id",  name="unique_product_product_type"),
     )
 
